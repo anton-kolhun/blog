@@ -1,3 +1,6 @@
+= Software Engineering Blog
+:favicon: ../static/image/favicon.png
+
 ++++
 <html>
 <head>
