@@ -1,0 +1,4 @@
+include::tiles/header.adoc[]
+{sp} +
+- link:/vespa-basic[Efficient Full Text Search With Vespa: Basic Start]
+image:static/image/vespa.png[vespa,100]

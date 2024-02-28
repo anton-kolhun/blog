@@ -1,0 +1,10 @@
+include::tiles/header.adoc[]
+
+== About Me:
+
+Hi, I'm Anton, a software engineer at Wix. I'm excited to share my knowledge and insights with you.
+
+== Let's Connect:
+
+Have questions about a recent post? Or just want to say hello? Feel free to reach out to me at anton.kolhun@gmail.com. I look forward to hearing from you!
+
