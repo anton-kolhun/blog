@@ -1,0 +1,12 @@
+include::common/header.adoc[]
+
+
+
+=== About Vespa
+image:../static/image/vespa.png[vespa,100]
+
+Vespa is a full-featured search engine with full support for traditional information retrieval as well as modern vector embedding based techniques.
+link:https://vespa.ai/[More]
+
+- link:/vespa/basic[Basic Start]
+- link:/vespa/ranking[Customize Ranking]

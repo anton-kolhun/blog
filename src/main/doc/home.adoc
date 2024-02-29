@@ -1,4 +1,5 @@
-include::tiles/header.adoc[]
-{sp} +
-- link:/vespa-basic[Efficient Full Text Search With Vespa: Basic Start]
-image:static/image/vespa.png[vespa,100]
+include::common/header.adoc[]
+
+= Software Engineering Blog
+
+- link:/vespa/all[Efficient Full Text Search With Vespa]

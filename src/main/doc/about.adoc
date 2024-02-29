@@ -1,10 +1,22 @@
-include::tiles/header.adoc[]
+include::common/header.adoc[]
 
-== About Me:
+== About Me
 
 Hi, I'm Anton, a software engineer at Wix. I'm excited to share my knowledge and insights with you.
 
-== Let's Connect:
+== Let's Connect
 
-Have questions about a recent post? Or just want to say hello? Feel free to reach out to me at anton.kolhun@gmail.com. I look forward to hearing from you!
+Have questions about a recent post? Or just want to say hello? Feel free to reach out. I look forward to hearing from you!
 
+
+[cols="1,5"]
+|===
+|Email
+|anton.kolhun@gmail.com
+
+|LinkedIn
+|https://www.linkedin.com/in/anton-kolhun-ab999b35/
+
+|GitHub
+|https://github.com/anton-kolhun
+|===

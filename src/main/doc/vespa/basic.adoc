@@ -1,0 +1,98 @@
+include::common/header.adoc[]
+
+== Efficient Full Text Search With Vespa: Basic Start
+image:../static/image/vespa.png[vespa,100]
+
+=== Prerequisites
+Before diving into Vespa's full text search capabilities, ensure you have the following:
+
+* link:https://docs.docker.com/engine/install/[Docker] installed.
+* link:https://docs.vespa.ai/en/vespa-cli.html[Vespa CLI] installed
+* Download link:https://github.com/anton-kolhun/vespa-sample[Vespa Application Package] Sample
+
+=== Setting Up Vespa Container
+Start by running a Vespa container using Docker:
+----
+docker run -d -p 8080:8080 -p 19071:19071 vespaengine/vespa
+----
+
+=== Deploy Vespa Application Package (VAP)
+Navigate to the downloaded VAP directory. The crucial components here are `book.sd` - the schema of the search entity (book).
+And `book_v1.xml` - the search query template (profile) based on three fields: title, tags, and description.
+
+Deploy the VAP:
+----
+vespa deploy book
+----
+
+=== Feeding Documents
+Once the VAP is deployed and running, feed documents using:
+----
+vespa feed book/ext/docs.json
+----
+
+=== Search Documents
+Execute search requests using curl:
+----
+curl http://localhost:8080/search/ \
+--header 'Content-Type: application/json' \
+--data '{
+    "queryProfile": "book_v1",
+    "search_term": "Scott Fitzgerald",
+    "query_filter": "AND year > 1800"
+}'
+----
+or
+----
+curl http://localhost:8080/search/ \
+--header 'Content-Type: application/json' \
+--data '{
+    "queryProfile": "book_v1",
+    "search_term": "Diamond",
+    "query_filter": "AND year > 1800"
+}'
+----
+Both requests should return Scott Fitzgerald's "The Diamond as Big as the Ritz" book:
+----
+{
+    "root": {
+        "id": "toplevel",
+        "relevance": 1.0,
+        "fields": {
+            "totalCount": 1
+        },
+        "coverage": {
+            "coverage": 100,
+            "documents": 6,
+            "full": true,
+            "nodes": 1,
+            "results": 1,
+            "resultsFull": 1
+        },
+        "children": [
+            {
+                "id": "index:content/0/65d8db90af64f0e5c9b77e55",
+                "relevance": 0.08409605150787772,
+                "source": "content",
+                "fields": {
+                    "sddocname": "book",
+                    "title": "The Diamond as Big as the Ritz",
+                    "author": "Scott Fitzgerald",
+                    "description": "Scott Fitzgerald's extraordinary fantasy was written...",
+                    "tags": [
+                        "science"
+                    ],
+                    "year": 1921
+                }
+            }
+        ]
+    }
+}
+----
+Note: By default, the returned documents are ordered by the link:https://blog.vespa.ai/blog-search-application-in-vespa/#relevance-and-ranking[relevance] field.
+
+=== Summary
+Congratulations on setting up Vespa efficiently! In just a few steps, you've deployed the Vespa engine, indexed documents, and executed search requests seamlessly.
+
+====== Next Steps
+Explore  link:/vespa/ranking[Customizing Ranking] to enhance search results further.
