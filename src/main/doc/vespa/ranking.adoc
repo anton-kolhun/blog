@@ -1,10 +1,13 @@
 include::common/header.adoc[]
 
-==  Customizing Ranking
-image:../static/image/vespa.png[vespa,100]
+== Efficient Full Text Search With Vespa:  Customizing Ranking
+image:../static/image/calendar.png[cal,20] [.greyed]#1 Mar 20024#
 
 The goal of ranking is to order (rank) the documents retrieved by a query. It can be configured via  rank profiles defined in schemas.
 link:https://docs.vespa.ai/en/ranking.html[More]
+
+=== Goal
+Explore the customization of ranking in Vespa. By configuring rank profiles, you will learn how to enhance search results.
 
 === Prerequisites
 Before proceeding, ensure  link:/vespa/basic[Vespa Basic Start] is completed
@@ -43,7 +46,7 @@ search book {
 
 In this configuration, the weight of searchable fields is specified as follows: title=0.5, tags=0.25, description=0.25.
 
-The score function textMatchScore sums the link:https://docs.vespa.ai/en/reference/nativerank.html#nativefieldmatch[nativeFieldMatch(<fields>>] multiplied by their respective weights.
+The score function textMatchScore sums the link:https://docs.vespa.ai/en/reference/nativerank.html#nativefieldmatch[nativeFieldMatch(<fields>)] multiplied by their respective weights.
 
 Additionally, a link:https://docs.vespa.ai/en/reference/schema-reference.html#rank-score-drop-limit[rank-score-drop-limit] parameter is set to filter out matching documents with a relevance below 0.01.
 
@@ -91,6 +94,7 @@ curl --location 'http://localhost:8080/search/' \
 }'
 ----
 Notice that the relevance for the matching document increases.
+
 This can be useful when specific context is required in a particular request.
 For instance, to retrieve matches by 'title' field only, the request should look like:
 ----

@@ -2,7 +2,7 @@ include::common/header.adoc[]
 
 == About Me
 
-Hi, I'm Anton, a software engineer at Wix. I'm excited to share my knowledge and insights with you.
+Hi, I'm Anton, a software engineer. I'm excited to share my knowledge and insights with you.
 
 == Let's Connect
 
