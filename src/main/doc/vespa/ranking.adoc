@@ -113,3 +113,5 @@ curl --location 'http://localhost:8080/search/' \
 
 Through these steps, we successfully customized our rank profile to suit our needs.
 
+====== Next Steps
+Explore  link:/vespa/ngram[N-Gram Search] to enhance search results further.

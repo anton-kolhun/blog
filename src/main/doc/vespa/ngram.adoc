@@ -1,0 +1,107 @@
+include::common/header.adoc[]
+
+== Efficient Full Text Search With Vespa: N-Gram Search
+image:../static/image/calendar.png[cal,20] [.greyed]#8 Mar 20024#
+
+N-gram search offers an effective solution for handling spelling corrections by breaking down words into smaller units (n-grams).
+This simplifies the process of identifying misspellings based on the similarity of the n-grams.
+
+=== Goal
+Explore the built-in link:https://docs.vespa.ai/en/reference/schema-reference.html#gram[N-gram] capabilities of Vespa.
+
+=== Prerequisites
+Before proceeding, ensure  link:/vespa/ranking[Customizing Ranking] is completed
+
+=== Performing a Search with a Typo:
+When submitting a request with the search term "diamont" (a typo for "diamond"),
+the expected document titled "The Diamond as Big as the Ritz" is not retrieved.
+----
+curl http://localhost:8080/search/ \
+--header 'Content-Type: application/json' \
+--data '{
+"queryProfile": "book_v1",
+"search_term": "diamont",
+}'
+----
+Let's adjust our VAP to handle such scenarios.
+
+=== Adding an N-Gram Field to the Schema:
+To use N-Gram functionality, modify the link:https://github.com/anton-kolhun/vespa-sample/blob/add-ngram/book/schemas/book.sd#L33-L48[book] schema as outlined below:
+
+
+----
+search book {
+    document book {
+      ...
+    }
+
+    field ngram type string {
+        indexing {
+            # Initialize variables
+            "" | set_var tags_var | set_var description_var | set_var title_var;
+
+            select_input {tags: (input tags | join " ") | set_var tags_var;};
+            select_input {description: input description | set_var description_var;};
+            select_input {title: input title | set_var title_var;};
+
+            get_var tags_var . " " . (get_var description_var) . " " . (get_var title_var)  | index
+        }
+        match {
+            gram
+            gram-size: 2
+        }
+    }
+    ...
+
+    rank-profile custom inherits default {
+
+        rank-properties {
+            ...
+            query(ngram_match_weight): 0.2
+            query(text_match_weight) : 0.8
+
+        }
+        ...
+
+        function ngramMatchScore () {
+           expression: fieldMatch(ngram)
+         }
+
+        first-phase {
+            expression: textMatchScore * query(ngram_match_weight)  + ngramMatchScore * query(ngram_match_weight)
+            rank-score-drop-limit: 0.01
+        }
+
+    }
+}
+----
+In this example the `gram-size` is set to 2, but any value can be used.
+A lower gram-size will get more hits, but may also find more irrelevant hits.
+There have also been weights assigned for text and n-gram scores (`query(ngram_match_weight)`, `query(ngram_match_weight)`).
+To avoid false positive results caused by N-Gram match - try to use a relatively small weight for ngram
+
+=== Adding a N-Gram field To The Query Profile
+Update the link:https://github.com/anton-kolhun/vespa-sample/blob/add-ngram/book/search/query-profiles/book_v1.xml#L14[book_v1] query profile as follows:
+----
+<query-profile id="book_v1">
+     ...
+    <field name="yql">select * from book where
+      (
+        ([{"defaultIndex": "title","grammar": "any","stem": true,"allowEmpty": true, "usePositionData": true}]userInput(@search_term)) OR
+        ([{"defaultIndex": "description","grammar": "any","stem": true,"allowEmpty": true, "usePositionData": true}]userInput(@search_term)) OR
+        ([{"defaultIndex": "tags","grammar": "any","stem": true,"allowEmpty": true, "usePositionData": true}]userInput(@search_term)) OR
+        ([{"defaultIndex": "ngram","grammar": "any","stem": true,"allowEmpty": true, "usePositionData": true}]userInput(@search_term))
+      )
+    %{query_filter}
+    </field>
+     ...
+</query-profile>
+----
+
+Now, when resubmitting the same request with the search term "diamont,"
+the response includes the document with the title "The Diamond as Big as the Ritz."
+
+=== Summary
+
+By following these steps, we have successfully implemented N-gram search functionality,
+enabling the retrieval of results for search terms that may contain typos
