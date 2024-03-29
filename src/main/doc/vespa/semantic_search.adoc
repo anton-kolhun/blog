@@ -1,0 +1,91 @@
+include::common/header.adoc[]
+
+== Efficient Full Text Search With Vespa: Configure Semantic Search
+image:../static/image/calendar.png[cal,20] [.greyed]#29 Mar 20024#
+
+Semantic search finds data by understanding the meaning behind your search, rather than just matching keywords.
+
+=== Goal
+Configure semantic search utilizing link:https://huggingface.co/intfloat/e5-small-v2[e5-small-v2 embedding model]
+
+=== Prerequisites
+Before proceeding, ensure  link:/vespa/ranking[Customizing Ranking] is completed.
+
+=== Define Embedding Model in VAP
+- Add necessary link:https://github.com/anton-kolhun/vespa-sample/blob/add-semantic-search/book/model/e5-small-v2-int8.onnx[e5-small-v2-int8.onnx] and `tokenizer.json` files
+(Use vespa link:https://github.com/vespa-engine/sample-apps/tree/master/simple-semantic-search/#huggingface-embedder[tooling] to generate required resources)
+- Define the model in link:https://github.com/anton-kolhun/vespa-sample/blob/add-semantic-search/book/services.xml#L11[services.xml]
+
+=== Add Embedding Field
+- Define link:https://github.com/anton-kolhun/vespa-sample/blob/add-semantic-search/book/schemas/book.sd#L51[emb_field] as follows:
+----
+field emb_field type tensor<float>(x[384]) {
+        indexing {
+            # Initialize variables
+            "" | set_var tags_var | set_var description_var | set_var title_var;
+
+            select_input {tags: (input tags | join " ") | set_var tags_var;};
+            select_input {description: input description | set_var description_var;};
+            select_input {title: input title | set_var title_var;};
+
+           "passage: " . (get_var tags_var) . " " . (get_var description_var) . " " . (get_var title_var)  | embed e5 | attribute | index
+        }
+    }
+----
+Here we concatenate `tags`, `description` and `title` fields to compute embedding using the specified `e5` model.
+
+- Create new  link:https://github.com/anton-kolhun/vespa-sample/blob/add-semantic-search/book/search/query-profiles/book_ann_v1.xml[book_ann_v1] query-profile as:
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<query-profile id="book_ann_v1">
+    <field name="maxHits">100</field>
+    <field name="maxOffset">100</field>
+    <field name="hits">10</field>
+    <field name="ranking.profile">ann</field>
+
+    <field name="yql">select * from book where
+        ({"targetHits": 100, "label": "nns"}nearestNeighbor(emb_field, embedding))
+    </field>
+
+    <field name="ranking.features.query(embedding)">embed(e5, "%{search_term}")</field>
+    <field name="search_term"></field>
+    <field name="timeout">2s</field>
+    <field name="rules.off">false</field>
+</query-profile>
+----
+Here, the `ranking.features.query(embedding)` field computes the embedding based on the `search_term` parameter and passes it to the link:https://docs.vespa.ai/en/nearest-neighbor-search.html#querying-using-nearestneighbor-query-operator[nearestNeighbor] function for ranking matching documents.
+
+- Add a new link:https://github.com/anton-kolhun/vespa-sample/blob/add-semantic-search/book/schemas/book.sd#L102[rank profile] based on the `nearestNeighbor` function:
+----
+ rank-profile ann inherits default {
+        inputs {
+            query(embedding) tensor<float>(x[384])
+        }
+
+        function annMatchScore () {
+            expression: closeness(label,nns)
+        }
+
+        first-phase {
+            expression: annMatchScore
+        }
+    }
+----
+Here, label `nns` refers to the annotation defined in the query-profile.
+
+=== Execute Search
+Let’s search for "huge gem":
+----
+curl --location 'http://localhost:8080/search/' \
+--header 'Content-Type: application/json' \
+--data '{
+    "queryProfile": "book_ann_v1",
+    "search_term": "huge gem",
+    "query_filter": "AND year > 1900"
+}'
+----
+As anticipated, "The Diamond as Big as the Ritz" receives the highest rank.
+
+=== Summary
+
+By following these steps, we have configured a semantic search that significantly improves the search quality.

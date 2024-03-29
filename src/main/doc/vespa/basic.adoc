@@ -16,7 +16,7 @@ Before diving into Vespa's full text search capabilities, ensure you have the fo
 === Setting Up Vespa Container
 Start by running a Vespa container using Docker:
 ----
-docker run -d -p 8080:8080 -p 19071:19071 vespaengine/vespa
+docker run -d -p 8080:8080 -p 19071:19071 vespaengine/vespa:8.296.15
 ----
 
 === Deploy Vespa Application Package (VAP)

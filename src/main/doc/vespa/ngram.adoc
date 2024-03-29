@@ -105,3 +105,6 @@ the response includes the document with the title "The Diamond as Big as the Rit
 
 By following these steps, we have successfully implemented N-gram search functionality,
 enabling the retrieval of results for search terms that may contain typos
+
+====== Next Steps
+Explore  link:/vespa/rules[Search Rules] to enhance search results further.

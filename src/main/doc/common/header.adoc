@@ -1,5 +1,5 @@
 :favicon: ../static/image/favicon.png
-:title: Software Engineering BLog
+:title: Software Engineering Blog
 
 ++++
 <html>

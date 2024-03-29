@@ -1,0 +1,65 @@
+include::common/header.adoc[]
+
+== Efficient Full Text Search With Vespa: Adding Search Rules
+image:../static/image/calendar.png[cal,20] [.greyed]#8 Mar 20024#
+
+Vespa rules are used for replacing or filtering out insignificant search terms that does not bring any value to search results.
+A common scenario involves disregarding common words like "the" during searches.
+
+=== Goal
+Implement link:https://docs.vespa.ai/en/query-rewriting.html#rules[rules] that disregard specific words in search requests.
+
+=== Prerequisites
+Before proceeding, ensure  link:/vespa/ranking[Customizing Ranking] is completed.
+
+=== Performing a Search without Rules:
+When sending a request with the search term "the diamond," several documents containing only the word "the" are retrieved:
+----
+curl http://localhost:8080/search/ \
+--header 'Content-Type: application/json' \
+--data '{
+"queryProfile": "book_v1",
+"search_term": "the diamond",
+}'
+----
+Let’s modify our application to ignore such terms.
+
+=== Adding Rule to the VAP:
+Add link:https://github.com/anton-kolhun/vespa-sample/blob/enable-search-rules/book/rules/stopwords.sr[./rules/stopwords.sr] file into the VAP.
+
+
+----
+@default
+
+# Stopwords: replace them by nothing
+title:[stopword] -> ;
+description:[stopword] -> ;
+tags:[stopword] -> ;
+ngram:[stopword] -> ;
+[stopword] :- a,am,an,and,are,as,at,be,because,been,but,by,can,com,could,did,do,does,for,from,had,has,have,he,her,him,his,how,i,if,in,is,it,its,me,my,no,not,of,on,or,our,she,should,so,some,someone,than,that,the,their,them,then,there,these,they,this,through,to,too,us,was,way,we,were,what,when,where,which,who,why,will,with,would,www,you,your,can t,doesn t,how s,it s,that s,there s,what s,when s;
+
+----
+Here, we specify:
+
+- the set of words to be ignored (`[stopword]`)
+- fields to which the provided rule should be applied (`title`, `description`, `tags`, `ngram`)
+
+=== Enabling the Rule in the Query Profile
+Activate the rule in link:https://github.com/anton-kolhun/vespa-sample/blob/enable-search-rules/book/search/query-profiles/book_v1.xml#L20[book_v1] as follows:
+----
+<query-profile id="book_v1">
+     ...
+  <field name="rules.off">false</field>
+     ...
+</query-profile>
+----
+
+Now, when resubmitting the same request
+the response contains only the document "The Diamond as Big as the Ritz."
+
+=== Summary
+
+By following these steps, we have successfully implemented and activated the rule to filter out insignificant words in search requests.
+
+====== Next Steps
+Explore  link:/vespa/semantic_search[Semantic Search] to improve search quality further
