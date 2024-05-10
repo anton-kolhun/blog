@@ -3,7 +3,9 @@ include::common/header.adoc[]
 == Efficient Full Text Search With Vespa: Configure Semantic Search
 image:../static/image/calendar.png[cal,20] [.greyed]#29 Mar 20024#
 
-Semantic search is the process of retrieving information by understanding the meaning behind your search, rather than just matching keywords.
+Semantic search is the process of retrieving information by understanding the meaning behind your query, rather than just matching keywords.
+For example, if you search for "healthy breakfast recipes," a semantic search engine might return results like "10 Nutritious Breakfast Ideas"
+or "Quick and Easy Breakfast Options." It considers synonyms, related concepts, and context to provide more relevant results.
 
 === Goal
 Configure semantic search utilizing link:https://huggingface.co/intfloat/e5-small-v2[e5-small-v2 embedding model]
