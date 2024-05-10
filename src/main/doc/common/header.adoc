@@ -46,6 +46,17 @@ body {
   color: white;
 }
 </style>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    if (window.location.href.includes('home')) {
+      console.log('home')
+      document.getElementById('home').classList.add('active');
+    } else if (window.location.href.includes('about')) {
+      console.log('about')
+      document.getElementById('about').classList.add('active');
+    }
+});
+</script>
 </head>
 <body>
 
