@@ -1,5 +1,5 @@
 :favicon: ../static/image/favicon.png
-:title: Software Engineering Blog
+:title: Software Engineering Blog by Anton Kolhun
 
 ++++
 <html>
