@@ -126,7 +126,7 @@ This functionality was adapted from openai link:https://github.com/openai/CLIP/b
 - Place the link:https://github.com/anton-kolhun/vespa-sample/blob/add-image-search/book/files/bpe_simple_vocab_16e6.txt.gz[bpe_simple_vocab_16e6.txt.gz] vocabulary in the `/book/files` folder (it's used by `BPETokenizer`)
 
 
-=== Build and Package Components Into VAP
+=== Build and Package Components into VAP
 
 - Package the components with the vespa maven link:https://docs.vespa.ai/en/components/bundles.html#maven-bundle-plugin[plugin]:
 ----
@@ -148,7 +148,7 @@ vespa deploy book
 ----
 
 - Feed The Documents +
-Popualte `image_url` field in the test link:https://github.com/anton-kolhun/vespa-sample/blob/add-image-search/book/ext/docs.json[documents] with appropriate image URLs and then run:
+Populate `image_url` field in the test link:https://github.com/anton-kolhun/vespa-sample/blob/add-image-search/book/ext/docs.json[documents] with appropriate image URLs and then run:
 ----
 vespa feed book/ext/docs.json
 ----
