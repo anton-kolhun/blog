@@ -97,3 +97,6 @@ As anticipated, "The Diamond as Big as the Ritz" receives the highest rank.
 === Summary
 
 By following these steps, we have configured a semantic search that significantly improves the search quality.
+
+====== Next Steps
+Explore  link:/vespa/text_to_image_search[Text-To-Image Search] to improve search quality further

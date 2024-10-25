@@ -1,0 +1,172 @@
+include::common/header.adoc[]
+
+== Efficient Full Text Search With Vespa: Configure Text To Image Search With CLIP Models
+image:../static/image/calendar.png[cal,20] [.greyed]#25 Oct 20024#
+
+Text-to-image search allows users to enter a text description and retrieve matching images based on that description.
+This guide shows how to set up a text-to-image search in Vespa using the CLIP model.
+
+=== Goal
+Configure text-to-image search using CLIP link:https://huggingface.co/rocca/openai-clip-js/tree/main[clip-image-vit-32] model to enable retrieval of relevant images based on textual input.
+
+=== Prerequisites
+* Ensure  link:/vespa/semantic_search[Configure Semantic Search] is completed.
+* link:https://docs.docker.com/compose/install/[Docker-compose] installed.
+* link:https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html[JDK 17+] installed.
+* link:https://maven.apache.org/install.html[Maven 3+] installed.
+
+===  Add Fields and Rank Profile
+Define `image_url` and `vit_b_32_image` link:https://github.com/anton-kolhun/vespa-sample/blob/add-image-search/book/schemas/book.sd#L32-L47[fields] in the schema:
+----
+field image_url type string {
+    indexing:  summary
+}
+
+field vit_b_32_image type tensor<float>(x[512]) {
+    indexing: attribute | index | summary
+    attribute {
+        distance-metric: euclidean
+    }
+    index {
+        hnsw {
+            max-links-per-node: 16
+            neighbors-to-explore-at-insert: 200
+        }
+    }
+}
+----
+where
+
+- `image_url` is filled during feeding with values like https://ak-pub-images.s3.eu-central-1.amazonaws.com/pexels-photo-2735970.jpeg.
+- `vit_b_32_image` is populated automatically by `ImageEmbedderProcessor` component, which creates a tensor based on the image content in `image_url`.
+
+Create a new link:https://github.com/anton-kolhun/vespa-sample/blob/add-semantic-search/book/schemas/book.sd#L102[rank profile]:
+----
+rank-profile vit_b_32_similarity inherits default {
+    inputs {
+      query(vit_b_32_text) tensor<float>(x[512])
+    }
+
+    first-phase {
+      expression: closeness(label, nns)
+    }
+  }
+----
+In this setup, the label `nns` is defined in the query profile, as shown below
+
+===  Create link:https://github.com/anton-kolhun/vespa-sample/blob/add-image-search/book/search/query-profiles/book_image_v1.xml[book_image_v1] query-profile as:
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<query-profile id="book_image_v1">
+    <field name="maxHits">100</field>
+    <field name="maxOffset">100</field>
+    <field name="hits">10</field>
+    <field name="ranking.profile">vit_b_32_similarity</field>
+    <field name="text_embedding_enabled">true</field>
+
+    <field name="yql">select * from book where
+        ({"targetHits": 100, "label": "nns"}nearestNeighbor(vit_b_32_image, vit_b_32_text))
+        %{query_filter}
+    </field>
+
+    <field name="timeout">2s</field>
+    <field name="rules.off">false</field>
+</query-profile>
+----
+Here, the `vit_b_32_text` parameter is populated by `TextEmbeddingSearcher` component which computes the embedding based on the `search_term` parameter
+
+
+=== Setting Up Models in VAP
+CLIP includes two models: one for text and one for images. They are trained together by pairing images with text descriptions. +
+Download image link:https://huggingface.co/rocca/openai-clip-js/blob/main/clip-image-vit-32-float32.onnx[clip_image_vit_b_32_v1.onnx]
+and text link:https://huggingface.co/rocca/openai-clip-js/blob/main/clip-text-vit-32-float32-int32.onnx[clip_text_vit_b_32_v1.onnx] models.
+Place them in the `./models` folder and rename to `clip_image_vit_b_32_v1.onnx` and `clip_text_vit_b_32_v1.onnx` respectively.
+
+=== Creating Components To Utilize The Models
+- Add the necessary link:https://github.com/anton-kolhun/vespa-sample/tree/add-image-search/src/main[codebase] components:
+ * `ImageEmbedderProcessor`: Uses `clip_image_vit_b_32_v1.onnx`  to convert image content into tensors,
+  which it stores in a specified document field during feeding
+ * `BPETokenizer` - Tokenizer used by `ImageEmbedderProcessor`
+ * `TextEmbeddingSearcher` -  Uses `clip_text_vit_b_32_v1.onnx`  to convert text-based search queries into tensors for ranking calculations.
+
+- Add Math-Engine link:https://github.com/anton-kolhun/vespa-sample/blob/add-image-search/image-search/math-engine/app/app.py[application] that exposes an HTTP endpoint to download images from specified URLs and convert them to tensors.
+This functionality was adapted from openai link:https://github.com/openai/CLIP/blob/main/clip/clip.py#L80[clip] codebase based on the following link:https://github.com/openai/CLIP?tab=readme-ov-file#usage[guideline]. +
+`ImageEmbedderProcessor` link:https://github.com/anton-kolhun/vespa-sample/blob/add-image-search/src/main/java/edu/component/ImageEmbedderProcessor.java#L99[calls] this endpoint to calculate image embedding.
+
+- Define necessary changes in services.xml:
+----
+ <model-evaluation/>
+ ...
+<documentprocessor id="edu.component.ImageEmbedderProcessor" bundle="text-image-search">
+    <config name="edu.component.image-embedder">
+        <modelName>clip_image_vit_b_32_v1</modelName>
+        <schemaToFieldsCfg>
+            <item key="book">image_url,vit_b_32_image</item>
+        </schemaToFieldsCfg>
+    </config>
+</documentprocessor>
+...
+<component id="edu.component.BPETokenizer" bundle="text-image-search">
+    <config name="edu.component.bpe-tokenizer">
+        <contextlength>77</contextlength>
+        <vocabulary>files/bpe_simple_vocab_16e6.txt.gz</vocabulary>
+    </config>
+</component>
+...
+
+<searcher id='edu.component.TextEmbeddingSearcher' bundle="text-image-search">
+    <config name="edu.component.text-embedder">
+        <modelName>clip_text_vit_b_32_v1</modelName>
+        <rankFeatureParam>query(vit_b_32_text)</rankFeatureParam>
+    </config>
+</searcher>
+
+----
+
+- Place the link:https://github.com/anton-kolhun/vespa-sample/blob/add-image-search/book/files/bpe_simple_vocab_16e6.txt.gz[bpe_simple_vocab_16e6.txt.gz] vocabulary in the `/book/files` folder (it's used by `BPETokenizer`)
+
+
+=== Build and Package Components Into VAP
+
+- Package the components with the vespa maven link:https://docs.vespa.ai/en/components/bundles.html#maven-bundle-plugin[plugin]:
+----
+mvn package
+----
+- Copy the generated `./target/application/components/text-image-search-deploy.jar` file to the  `./book/components` folder
+
+
+=== Setting Up Docker-Compose and Deploying the VAP
+- Start docker compose:
+----
+docker-compose up -d
+----
+This will launch the Vespa-Engine and Math-Engine applications as  defined in link:https://github.com/anton-kolhun/vespa-sample/blob/add-image-search/image-search/docker-compose.yml[docker-compose.yml]
+
+- Deploy VAP:
+----
+vespa deploy book
+----
+
+- Feed The Documents +
+Popualte `image_url` field in the test link:https://github.com/anton-kolhun/vespa-sample/blob/add-image-search/book/ext/docs.json[documents] with appropriate image URLs and then run:
+----
+vespa feed book/ext/docs.json
+----
+
+=== Execute Search
+To test the setup, perform a search for "boat":
+----
+curl --location 'http://localhost:8080/search/' \
+--header 'Content-Type: application/json' \
+--data '{
+    "queryProfile": "book_image_v1",
+    "search_term": "boat"
+}'
+----
+The search should return results where "The Open Boat" receives the highest rank.
+
+=== Summary
+
+By following these steps, we have successfully configured a text-to-image search in Vespa,
+ enabling accurate and efficient image retrieval based on textual descriptions.
+
