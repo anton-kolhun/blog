@@ -54,7 +54,7 @@ rank-profile vit_b_32_similarity inherits default {
 ----
 In this setup, the label `nns` is defined in the query profile, as shown below
 
-===  Create link:https://github.com/anton-kolhun/vespa-sample/blob/add-image-search/book/search/query-profiles/book_image_v1.xml[book_image_v1] query-profile as:
+===  Create link:https://github.com/anton-kolhun/vespa-sample/blob/add-image-search/book/search/query-profiles/book_image_v1.xml[book_image_v1] query-profile:
 ----
 <?xml version="1.0" encoding="UTF-8"?>
 <query-profile id="book_image_v1">
@@ -86,8 +86,8 @@ Place them in the `./models` folder and rename to `clip_image_vit_b_32_v1.onnx` 
 - Add the necessary link:https://github.com/anton-kolhun/vespa-sample/tree/add-image-search/src/main[codebase] components:
  * `ImageEmbedderProcessor`: Uses `clip_image_vit_b_32_v1.onnx`  to convert image content into tensors,
   which it stores in a specified document field during feeding
- * `BPETokenizer` - Tokenizer used by `ImageEmbedderProcessor`
  * `TextEmbeddingSearcher` -  Uses `clip_text_vit_b_32_v1.onnx`  to convert text-based search queries into tensors for ranking calculations.
+ * `BPETokenizer` - Tokenizer used by `TextEmbeddingSearcher`
 
 - Add Math-Engine link:https://github.com/anton-kolhun/vespa-sample/blob/add-image-search/image-search/math-engine/app/app.py[application] that exposes an HTTP endpoint to download images from specified URLs and convert them to tensors.
 This functionality was adapted from openai link:https://github.com/openai/CLIP/blob/main/clip/clip.py#L80[clip] codebase based on the following link:https://github.com/openai/CLIP?tab=readme-ov-file#usage[guideline]. +
