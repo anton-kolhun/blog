@@ -3,3 +3,4 @@ include::common/header.adoc[]
 = Software Engineering Blog
 
 - link:/vespa/all[Efficient Full Text Search With Vespa]
+- link:/power_supply/notifications[Implementing Power Supply Status Notifications]
