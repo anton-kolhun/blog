@@ -12,7 +12,6 @@ import java.nio.file.Paths;
 public class BlogHttpHandler implements HttpHandler {
 
     @Override
-
     public void handle(HttpExchange exchange) throws IOException {
         if ("GET".equals(exchange.getRequestMethod())) {
             var uri = exchange.getRequestURI();
