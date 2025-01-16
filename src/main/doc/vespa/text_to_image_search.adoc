@@ -174,3 +174,5 @@ The search should return results where "The Open Boat" receives the highest rank
 By following these steps, we have successfully configured a text-to-image search in Vespa,
  enabling accurate and efficient image retrieval based on textual descriptions.
 
+====== Next Steps
+Explore link:https://www.wix.engineering/post/the-art-of-secure-search-how-wix-mastered-pii-data-in-vespa-search-engine[Implementing PII Search]
