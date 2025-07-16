@@ -1,7 +1,7 @@
 include::common/header.adoc[]
 
 == Efficient Full Text Search With Vespa: Basic Start
-image:../static/image/calendar.png[cal,20] [.greyed]#1 Mar 20024#
+image:../static/image/calendar.png[cal,20] [.greyed]#1 Mar 2024#
 
 === Goal
 Set up and deploy Vespa application. Index documents and execute search queries.

@@ -1,7 +1,7 @@
 include::common/header.adoc[]
 
 == Efficient Full Text Search With Vespa: Adding Search Rules
-image:../static/image/calendar.png[cal,20] [.greyed]#8 Mar 20024#
+image:../static/image/calendar.png[cal,20] [.greyed]#8 Mar 2024#
 
 Vespa rules are used for replacing or filtering out insignificant search terms that does not bring any value to search results.
 A common scenario involves disregarding common words like "the" during searches.

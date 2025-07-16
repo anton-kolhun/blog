@@ -4,3 +4,4 @@ include::common/header.adoc[]
 
 - link:/vespa/all[Efficient Full Text Search With Vespa]
 - link:/power_supply/notifications[Implementing Power Supply Status Notifications]
+- link:/ec2_auto_recovery/ec2_auto_recovery[Zero-Cost Website Recovery on AWS with Lambda]

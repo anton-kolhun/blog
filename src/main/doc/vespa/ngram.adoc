@@ -1,7 +1,7 @@
 include::common/header.adoc[]
 
 == Efficient Full Text Search With Vespa: N-Gram Search
-image:../static/image/calendar.png[cal,20] [.greyed]#8 Mar 20024#
+image:../static/image/calendar.png[cal,20] [.greyed]#8 Mar 2024#
 
 N-gram search offers an effective solution for handling spelling corrections by breaking down words into smaller units (n-grams).
 This simplifies the process of identifying misspellings based on the similarity of the n-grams.

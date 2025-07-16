@@ -1,7 +1,7 @@
 include::common/header.adoc[]
 
 == Efficient Full Text Search With Vespa:  Customizing Ranking
-image:../static/image/calendar.png[cal,20] [.greyed]#1 Mar 20024#
+image:../static/image/calendar.png[cal,20] [.greyed]#1 Mar 2024#
 
 The goal of ranking is to order (rank) the documents retrieved by a query. It can be configured via  rank profiles defined in schemas.
 link:https://docs.vespa.ai/en/ranking.html[More]

@@ -1,7 +1,7 @@
 include::common/header.adoc[]
 
 == Efficient Full Text Search With Vespa: Configure Text To Image Search With CLIP Models
-image:../static/image/calendar.png[cal,20] [.greyed]#25 Oct 20024#
+image:../static/image/calendar.png[cal,20] [.greyed]#25 Oct 2024#
 
 Text-to-image search allows users to enter a text description and retrieve matching images based on that description.
 For a example, "couple drinking coffee" query might return the image as follows:
