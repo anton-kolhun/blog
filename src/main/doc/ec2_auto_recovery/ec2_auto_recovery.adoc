@@ -96,6 +96,7 @@ nohup java -cp /home/ec2-user/blog/JAR com.example.blog.BlogApplication >> /home
 
 - Configure crontab.
 ```
+sudo yum install cronie
 crontab -e
 ```
 Add the following line:
