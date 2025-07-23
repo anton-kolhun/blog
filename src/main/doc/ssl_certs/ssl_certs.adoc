@@ -17,7 +17,7 @@ whether hosted on a different cloud provider or on a self-managed machine.
 - The application exposes HTTP traffic on a specific port (e.g., `8000`)
 
 === Solution Overview
-The most common way to secure your application with an SSL certificate is to introduce a *reverse proxy* (or a load balancer) in front of it.
+The most common way to secure your application with an SSL certificate is to introduce a *reverse proxy* in front of it.
 The reverse proxy exposes a *HTTPS* endpoint and forwards incoming traffic to your application’s *HTTP* port.
 [.center.text-center]
 image:../static/image/ssl_reverse_proxy.png[reverse-proxy, 800,800 float="center"]
