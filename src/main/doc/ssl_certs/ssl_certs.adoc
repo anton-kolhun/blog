@@ -1,7 +1,7 @@
 include::common/header.adoc[]
 
 == Enrolling and Provisioning an SSL Certificate With Let’s Encrypt
-image:../static/image/calendar.png[cal,20] [.greyed]#24 Jul 2025#
+image:../static/image/calendar.png[cal,20] [.greyed]#23 Jul 2025#
 
 === Goal
 This guide will walk you through securing a web application with an SSL certificate issued by *Let’s Encrypt*,
@@ -96,7 +96,7 @@ Run Certbot:
 ```
 sudo certbot
 ```
-Provide the requested info: email, domain name (ssl.ltpu.net), etc.
+Provide the requested info: email, domain name (`ssl.ltpu.net`), etc.
 If successful, you’ll see a message like:
 ```
 Deploying certificate
