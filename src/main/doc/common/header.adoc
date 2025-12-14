@@ -45,6 +45,9 @@ body {
   background-color: #04AA6D;
   color: white;
 }
+
+a.red-link { color: #d14; }
+
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', function(){

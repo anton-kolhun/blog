@@ -1,0 +1,9 @@
+include::common/header.adoc[]
+
+=== About Advent Of Code
+image:../static/image/aoc_logo.png[AoC,50]
+
+Advent of Code is an Advent calendar of small programming puzzles for a variety of skill levels that can be solved in any programming language.
+link:https://adventofcode.com/2025/about[More]
+
+- link:/aoc/aoc_2025[Advent of Code 2025: An Engineer’s Solution Notebook]
