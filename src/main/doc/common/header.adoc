@@ -7,7 +7,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 
-
 .content {
    font-size: 0.8em;
 }
@@ -23,8 +22,14 @@ body {
 }
 
 .topnav {
-  overflow: hidden;
   background-color: #333;
+  position: relative;
+}
+
+.topnav::after {
+  content: "";
+  display: table;
+  clear: both;
 }
 
 .topnav a {
@@ -48,24 +53,163 @@ body {
 
 a.red-link { color: #d14; }
 
+/* Search */
+.search-wrapper {
+  float: right;
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+}
+
+.search-wrapper input[type="search"] {
+  background: transparent;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  color: #f2f2f2;
+  font-size: 14px;
+  outline: none;
+  padding: 5px 28px 5px 10px;
+  width: 180px;
+  transition: width 0.2s, border-color 0.2s;
+}
+
+.search-wrapper input[type="search"]:focus {
+  border-color: #f2f2f2;
+  width: 240px;
+}
+
+.search-wrapper input[type="search"]::placeholder { color: #aaa; }
+.search-wrapper input[type="search"]::-webkit-search-cancel-button { display: none; }
+
+.search-icon {
+  position: absolute;
+  right: 26px;
+  pointer-events: none;
+  color: #aaa;
+  font-size: 14px;
+}
+
+.search-results {
+  background: #333;
+  border: 1px solid #555;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  display: none;
+  min-width: 340px;
+  position: absolute;
+  right: 16px;
+  top: calc(100% + 2px);
+  z-index: 1000;
+}
+
+.search-results.visible { display: block; }
+
+.search-results a {
+  border-bottom: 1px solid #444;
+  color: #f2f2f2;
+  display: block;
+  padding: 10px 14px;
+  text-decoration: none;
+}
+
+.search-results a:last-child { border-bottom: none; }
+.search-results a:hover { background: #444; }
+
+.search-results .result-title { font-size: 14px; font-weight: bold; }
+
+.search-results .result-summary {
+  color: #bbb;
+  font-size: 12px;
+  margin-top: 3px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.search-results .no-results {
+  color: #aaa;
+  font-size: 13px;
+  padding: 12px 14px;
+  text-align: center;
+}
+
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', function(){
     if (window.location.href.includes('home')) {
-      console.log('home')
       document.getElementById('home').classList.add('active');
     } else if (window.location.href.includes('about')) {
-      console.log('about')
       document.getElementById('about').classList.add('active');
     }
 });
+</script>
+<script type="module">
+  let pagefind;
+  async function initPagefind() {
+    if (!pagefind) {
+      pagefind = await import('/pagefind/pagefind.js');
+      await pagefind.init();
+    }
+    return pagefind;
+  }
+
+  function render(results, query) {
+    const box = document.getElementById("search-results");
+    if (!results.length) {
+      box.innerHTML = `<div class="no-results">No results for "<strong>${query}</strong>"</div>`;
+    } else {
+      box.innerHTML = results.map((r) =>
+        `<a href="${r.url.replace(/\.html$/, '')}">
+          <div class="result-title">${r.meta.title || r.url}</div>
+          <div class="result-summary">${r.excerpt}</div>
+        </a>`
+      ).join("");
+    }
+    box.classList.add("visible");
+  }
+
+  let debounce = null;
+
+  document.addEventListener("DOMContentLoaded", function() {
+    const input = document.getElementById("blog-search");
+    const box   = document.getElementById("search-results");
+
+    input.addEventListener("input", () => {
+      clearTimeout(debounce);
+      const q = input.value.trim();
+      if (!q) { box.classList.remove("visible"); return; }
+      debounce = setTimeout(async () => {
+        try {
+          const pf = await initPagefind();
+          const search = await pf.search(q);
+          const results = await Promise.all(search.results.slice(0, 8).map(r => r.data()));
+          render(results, q);
+        } catch (e) {
+          console.error("Search failed:", e);
+        }
+      }, 250);
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".search-wrapper")) {
+        box.classList.remove("visible");
+      }
+    });
+  });
 </script>
 </head>
 <body>
 
 <div class="topnav" id="navigation">
   <a id="home" href="/home">Home</a>
-  <a id="about" href="/about" >About</a>
+  <a id="about" href="/about">About</a>
+  <div class="search-wrapper">
+    <input type="search" id="blog-search" placeholder="Search" autocomplete="off" />
+    <span class="search-icon">&#128269;</span>
+    <div class="search-results" id="search-results"></div>
+  </div>
 </div>
 </body>
 </html>

@@ -18,6 +18,9 @@ public class BlogHttpHandler implements HttpHandler {
             if (uri.getPath().startsWith("/static/")) {
                 handleResponse(exchange, uri.getPath().substring(1));
             }
+            if (uri.getPath().startsWith("/pagefind/")) {
+                handleResponse(exchange, uri.getPath().substring(1));
+            }
             if (uri.getPath().equals("/")) {
                 handleResponse(exchange, "home.html");
             }
@@ -25,6 +28,14 @@ public class BlogHttpHandler implements HttpHandler {
             handleResponse(exchange, htmlPage);
         }
         throw new RuntimeException("HTTP method not supported");
+    }
+
+    private static String contentType(String path) {
+        if (path.endsWith(".js")) return "application/javascript";
+        if (path.endsWith(".css")) return "text/css";
+        if (path.endsWith(".wasm")) return "application/wasm";
+        if (path.endsWith(".html")) return "text/html; charset=utf-8";
+        return "application/octet-stream";
     }
 
     private void handleResponse(HttpExchange httpExchange, String resourcePath) throws IOException {
@@ -35,6 +46,7 @@ public class BlogHttpHandler implements HttpHandler {
                 return;
             }
             var page = Files.readAllBytes(Paths.get(pageURL.toURI()));
+            httpExchange.getResponseHeaders().set("Content-Type", contentType(resourcePath));
             httpExchange.sendResponseHeaders(200, page.length);
             outputStream.write(page);
             outputStream.flush();
