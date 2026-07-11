@@ -1,14 +1,384 @@
-:nofooter:
 ++++
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body>
+<style>
 
-<div class="topnav">
-  <a></a>
+/* Comments */
+.comments-section {
+  border-top: 2px solid #e7e7e9;
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 2.5em auto 0;
+  max-width: 62.5em;
+  padding: 1.5em 0.9375em 2em;
+}
+
+.comments-section h3 {
+  color: #ba3925;
+  font-size: 1.4em;
+  font-weight: 300;
+  margin: 0 0 1em;
+}
+
+.comment {
+  border-bottom: 1px solid #e7e7e9;
+  padding: 0.9em 0;
+}
+
+.comment:last-of-type { border-bottom: none; }
+
+.comment-meta { margin-bottom: 0.3em; }
+
+.comment-author { font-weight: bold; color: #333; }
+
+.comment-date { color: #999; font-size: 0.82em; margin-left: 0.6em; }
+
+.comment-content { color: #444; line-height: 1.6; white-space: pre-wrap; }
+
+.comment-form { margin-top: 1.8em; }
+
+.comment-form h4 {
+  color: #555;
+  font-size: 1em;
+  font-weight: bold;
+  margin: 0 0 0.8em;
+}
+
+.comment-form input[type="text"],
+.comment-form textarea {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  display: block;
+  font-family: inherit;
+  font-size: 0.9em;
+  margin-bottom: 0.7em;
+  padding: 0.5em 0.7em;
+  width: 100%;
+}
+
+.comment-form textarea { min-height: 90px; resize: vertical; }
+
+.comment-form input[type="text"]:focus,
+.comment-form textarea:focus {
+  border-color: #04AA6D;
+  outline: none;
+}
+
+.comment-form button {
+  background: #04AA6D;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  font-size: 0.9em;
+  padding: 0.5em 1.4em;
+}
+
+.comment-form button:hover { background: #038a58; }
+.comment-form button:disabled { background: #aaa; cursor: default; }
+
+.comment-status { color: #777; font-size: 0.88em; font-style: italic; margin-top: 0.5em; }
+
+/* Subscribe */
+.subscribe-section {
+  align-items: center;
+  background: #2d2d2d;
+  color: #f2f2f2;
+  display: flex;
+  font-family: Arial, Helvetica, sans-serif;
+  gap: 0.4em;
+  justify-content: center;
+  max-width: 62.5em;
+  margin: 0 auto;
+  padding: 0.28em 1.5em;
+}
+
+.subscribe-section h3 {
+  color: #bbb;
+  font-size: 0.55em;
+  font-weight: 400;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.subscribe-section p { display: none; }
+
+.subscribe-form {
+  align-items: center;
+  display: flex;
+  gap: 0.28em;
+}
+
+.subscribe-form input[type="email"] {
+  background: #3a3a3a;
+  border: 1px solid #555;
+  border-radius: 2px;
+  box-sizing: border-box;
+  color: #f2f2f2;
+  font-size: 0.53em;
+  padding: 0.21em 0.42em;
+  width: 140px;
+}
+
+.subscribe-form input::placeholder { color: #888; }
+
+.subscribe-form input:focus {
+  border-color: #04AA6D;
+  outline: none;
+}
+
+.subscribe-form button {
+  background: #555;
+  border: none;
+  border-radius: 2px;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 0.53em;
+  padding: 0.21em 0.56em;
+  white-space: nowrap;
+}
+
+.subscribe-form button:hover { background: #666; }
+.subscribe-form button:disabled { background: #444; cursor: default; }
+
+.subscribe-status {
+  color: #aaa;
+  font-size: 0.5em;
+  font-style: italic;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.subscribe-note { display: none; }
+
+/* Reactions */
+.reactions-section {
+  display: flex;
+  gap: 0.6em;
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 1.5em auto 0;
+  max-width: 62.5em;
+  padding: 0 0.9375em;
+}
+
+.reaction-btn {
+  align-items: center;
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  color: #666;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 0.88em;
+  gap: 0.35em;
+  padding: 0.3em 0.85em;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.reaction-btn:hover { background: #f5f5f5; border-color: #bbb; }
+.reaction-btn.active { background: #fff0ee; border-color: #ba3925; color: #ba3925; }
+.reaction-btn:disabled { cursor: default; opacity: 0.6; }
+
+</style>
+<script type="module">
+  const REACTIONS_API = window.location.hostname === "localhost"
+    ? "http://localhost:4321/api/reactions"
+    : "https://anton-blog-0ac9306d-antonkol.wix-site-host.com/api/reactions";
+  const COMMENTS_API = window.location.hostname === "localhost"
+    ? "http://localhost:4321/api/comments"
+    : "https://anton-blog-0ac9306d-antonkol.wix-site-host.com/api/comments";
+
+  const NON_ARTICLE = ["/home", "/about"];
+  const path = window.location.pathname;
+  const isArticle = !NON_ARTICLE.some((p) => path === p || path.endsWith(p))
+                 && !!document.querySelector(".sect1 > h2");
+
+  /* --- Reactions --- */
+
+  function reactionsKey(postUrl) { return `reactions:${postUrl}`; }
+
+  function getVoted(postUrl) {
+    try { return new Set(JSON.parse(localStorage.getItem(reactionsKey(postUrl)) || "[]")); }
+    catch { return new Set(); }
+  }
+
+  function saveVoted(postUrl, type) {
+    const voted = getVoted(postUrl);
+    voted.add(type);
+    localStorage.setItem(reactionsKey(postUrl), JSON.stringify([...voted]));
+  }
+
+  function renderReactions(counts, voted, postUrl) {
+    const section = document.getElementById("reactions-section");
+    section.innerHTML = [
+      { type: "like", emoji: "👍" },
+      { type: "heart", emoji: "❤️" },
+    ].map(({ type, emoji }) => `
+      <button class="reaction-btn${voted.has(type) ? " active" : ""}" data-type="${type}">
+        ${emoji} <span>${counts[type] ?? 0}</span>
+      </button>`).join("");
+
+    section.querySelectorAll(".reaction-btn").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const type = btn.dataset.type;
+        if (voted.has(type)) return;
+        btn.disabled = true;
+        try {
+          const res = await fetch(REACTIONS_API, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url: postUrl, type }),
+          });
+          if (!res.ok) return;
+          const newCounts = await res.json();
+          saveVoted(postUrl, type);
+          renderReactions(newCounts, getVoted(postUrl), postUrl);
+        } catch {
+          btn.disabled = false;
+        }
+      });
+    });
+  }
+
+  /* --- Comments --- */
+
+  function formatDate(iso) {
+    return new Date(iso).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  }
+
+  function renderComments(comments) {
+    const list = document.getElementById("comments-list");
+    if (!comments.length) {
+      list.innerHTML = '<p class="comment-status">No comments yet. Be the first!</p>';
+      return;
+    }
+    list.innerHTML = comments.map((c) => `
+      <div class="comment">
+        <div class="comment-meta">
+          <span class="comment-author">${c.author}</span>
+          <span class="comment-date">${formatDate(c.createdAt)}</span>
+        </div>
+        <div class="comment-content">${c.content}</div>
+      </div>`).join("");
+  }
+
+  async function loadComments() {
+    const postUrl = window.location.origin + window.location.pathname;
+    const list = document.getElementById("comments-list");
+    list.innerHTML = '<p class="comment-status">Loading comments…</p>';
+    try {
+      const res = await fetch(`${COMMENTS_API}?url=${encodeURIComponent(postUrl)}`);
+      renderComments(res.ok ? await res.json() : []);
+    } catch {
+      list.innerHTML = '<p class="comment-status">Could not load comments.</p>';
+    }
+  }
+
+  /* --- Init --- */
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    if (!isArticle) return;
+
+    const postUrl = window.location.origin + window.location.pathname;
+
+    const reactionsSection = document.getElementById("reactions-section");
+    reactionsSection.style.display = "";
+    try {
+      const res = await fetch(`${REACTIONS_API}?url=${encodeURIComponent(postUrl)}`);
+      const counts = res.ok ? await res.json() : { like: 0, heart: 0 };
+      renderReactions(counts, getVoted(postUrl), postUrl);
+    } catch {
+      reactionsSection.style.display = "none";
+    }
+
+    document.querySelector(".comments-section").style.display = "";
+    loadComments();
+
+    document.getElementById("comment-submit").addEventListener("click", async () => {
+      const author  = document.getElementById("comment-author").value.trim();
+      const content = document.getElementById("comment-content").value.trim();
+      const status  = document.getElementById("comment-status");
+      const btn     = document.getElementById("comment-submit");
+
+      if (!author || !content) { status.textContent = "Please fill in both fields."; return; }
+
+      btn.disabled = true;
+      status.textContent = "Posting…";
+
+      try {
+        const res = await fetch(COMMENTS_API, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: postUrl, author, content }),
+        });
+        if (!res.ok) throw new Error();
+        document.getElementById("comment-author").value = "";
+        document.getElementById("comment-content").value = "";
+        status.textContent = "Comment posted!";
+        await loadComments();
+      } catch {
+        status.textContent = "Failed to post comment. Please try again.";
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  });
+</script>
+<script type="module">
+  const SUBSCRIBE_API = window.location.hostname === "localhost"
+    ? "http://localhost:4321/api/subscribe"
+    : "https://anton-blog-0ac9306d-antonkol.wix-site-host.com/api/subscribe";
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("sub-btn");
+    if (!btn) return;
+    btn.addEventListener("click", async () => {
+      const email  = document.getElementById("sub-email").value.trim();
+      const status = document.getElementById("sub-status");
+      const btn    = document.getElementById("sub-btn");
+
+      if (!email) { status.textContent = "Please enter your email."; return; }
+
+      btn.disabled = true;
+      status.textContent = "Subscribing…";
+
+      try {
+        const res = await fetch(SUBSCRIBE_API, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+        const data = await res.json();
+        if (!res.ok) { status.textContent = data.error ?? "Something went wrong."; return; }
+        status.textContent = "Subscribed! Thanks for following along.";
+        document.getElementById("sub-email").value = "";
+      } catch {
+        status.textContent = "Network error, please try again.";
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  });
+</script>
+<div id="reactions-section" class="reactions-section" style="display:none"></div>
+
+<div class="comments-section" style="display:none">
+  <h3>Comments</h3>
+  <div id="comments-list"></div>
+  <div class="comment-form">
+    <h4>Leave a comment</h4>
+    <input type="text" id="comment-author" placeholder="Your name" maxlength="100" />
+    <textarea id="comment-content" placeholder="Your comment…" maxlength="2000"></textarea>
+    <button id="comment-submit">Post comment</button>
+    <div id="comment-status" class="comment-status"></div>
+  </div>
 </div>
-</body>
-</html>
+
+<div class="subscribe-section">
+  <h3>New posts delivered straight to your inbox.</h3>
+  <div class="subscribe-form">
+    <input type="email" id="sub-email" placeholder="your@email.com" maxlength="200" autocomplete="email" />
+    <button id="sub-btn">Subscribe</button>
+  </div>
+  <div id="sub-status" class="subscribe-status"></div>
+  <div class="subscribe-note">No spam. Unsubscribe any time.</div>
+</div>
 ++++
