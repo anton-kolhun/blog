@@ -1,0 +1,77 @@
+include::common/header.adoc[]
+
+== Extending a Static Blog With Wix Headless: Comments, Reactions, and Newsletter
+image:../static/image/calendar.png[cal,20] [.greyed]#12 Jul 2026#
+
+This blog runs as a static site. Static sites are fast and simple to operate, but they have one obvious limitation: no server-side logic.
+Adding interactive features like comments normally means either rebuilding the site or setting up a backend from scratch.
+
+Wix Headless offers a third path: keep your existing site exactly as it is
+and connect it to Wix's managed backend through a hosted API layer.
+This post walks through how I added multiple features to this blog without changing its static nature or moving to a new platform.
+
+
+=== What Wix Headless Is
+
+link:https://dev.wix.com/docs/go-headless[Wix Headless] is a recommended path for building headless projects.
+Wix hosts and runs your backend and connects it to Wix business solutions - Data, CRM, Automations,
+Email Marketing, Bookings, Stores, Payments, Events, and more.
+You don't set up hosting or manage infrastructure.
+
+The link:https://github.com/anton-kolhun/wix-headless[Wix Headless app] built for this blog is a concrete example.
+It is a project scaffolded with the Wix CLI - no server to provision, no pipeline to configure.
+Deploying is a single command: `npm run release`.
+It acts purely as an API layer - the static blog itself stays on its own EC2 instance.
+The corresponding link:https://github.com/anton-kolhun/blog/pull/1[blog changes] wire up the client-side code
+that calls these endpoints from the browser.
+
+```
+src/pages/api/
+  comments.ts    ← GET/POST comments via Wix Data
+  reactions.ts   ← GET/POST reactions via Wix Data
+  subscribe.ts   ← POST new subscriber via Wix Contacts
+```
+
+In this post, three business solutions are put to work - Data, Contacts, and Automations.
+
+
+=== Features Added
+
+==== Comments and Reactions
+(link:https://github.com/anton-kolhun/wix-headless/commit/b52408c[View Commit])
+
+Readers can leave a comment on any article and react with 👍 or ❤️.
+The `/api/comments` and `/api/reactions` endpoints read from and write to Wix Data collections.
+
+
+==== Newsletter Subscription
+(link:https://github.com/anton-kolhun/wix-headless/commit/334d65e[View Commit])
+
+Readers can subscribe by email. The `/api/subscribe` endpoint creates a Wix Contact,
+which triggers a *Wix Automation* - `Contact Created` → send a welcome email.
+Future newsletters can be sent to all contacts via Wix Email Marketing without any additional code.
+
+
+=== Security
+
+Each endpoint link:https://github.com/anton-kolhun/wix-headless/blob/334d65e/src/pages/api/comments.ts#L57[validates] the `Origin` header
+and rejects requests from unknown domains, so the API cannot be called from outside the blog.
+
+Bot protection layers such as link:https://www.cloudflare.com/products/turnstile/[Cloudflare Turnstile]
+could be added to harden them further.
+
+
+=== Summary
+
+Adding Wix Headless to an existing static site took three self-contained API endpoints, a few lines of code, and one `npm run release`.
+There was no need to migrate the blog, change the hosting setup, or manage a database.
+
+The result:
+
+- Comments and reactions backed by Wix Data.
+- Newsletter subscription feeding directly into Wix Contacts and Automations - welcome emails and future broadcasts included.
+
+The source for the Wix Headless app is at link:https://github.com/anton-kolhun/wix-headless[github.com/anton-kolhun/wix-headless].
+
+For comparison, the original version of this blog without any of these features is still running at link:https://blog-no-wix-headless.ltpu.net/home[blog-no-wix-headless.ltpu.net].
+
