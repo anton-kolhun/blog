@@ -57,8 +57,8 @@ Future newsletters can be sent to all contacts via Wix Email Marketing without a
 Each endpoint link:https://github.com/anton-kolhun/wix-headless/blob/334d65e/src/pages/api/comments.ts#L57[validates] the `Origin` header
 and rejects requests from unknown domains, so the API cannot be called from outside the blog.
 
-Bot protection layers such as link:https://www.cloudflare.com/products/turnstile/[Cloudflare Turnstile]
-could be added to harden them further.
+Tools like link:https://www.cloudflare.com/products/turnstile/[Cloudflare Turnstile] could be added to harden them further -
+challenging the browser to prove it is a real interactive client.
 
 
 === Summary
