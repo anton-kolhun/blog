@@ -135,6 +135,29 @@ a.red-link { color: #d14; }
   text-align: center;
 }
 
+@media (max-width: 480px) {
+  .search-wrapper {
+    float: none;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 12px;
+  }
+
+  .search-wrapper input[type="search"] {
+    width: 100%;
+  }
+
+  .search-wrapper input[type="search"]:focus {
+    width: 100%;
+  }
+
+  .search-results {
+    left: 12px;
+    right: 12px;
+    min-width: unset;
+  }
+}
+
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', function(){
