@@ -101,3 +101,5 @@ Congratulations on setting up Vespa efficiently! In just a few steps, you've dep
 
 ====== Next Steps
 Explore  link:/vespa/ranking[Customizing Ranking] to enhance search results further.
+
+include::common/footer.adoc[]

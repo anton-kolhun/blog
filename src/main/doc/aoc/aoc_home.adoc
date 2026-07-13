@@ -7,3 +7,5 @@ Advent of Code is an Advent calendar of small programming puzzles for a variety 
 link:https://adventofcode.com/2025/about[More]
 
 - link:/aoc/aoc_2025[Advent of Code 2025: An Engineer’s Solution Notebook]
+
+include::common/footer.adoc[]

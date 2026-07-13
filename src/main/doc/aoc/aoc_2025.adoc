@@ -229,3 +229,5 @@ All 24 stars secured - time to power down and enjoy the holiday break. 🎄 +
 🌟 Wishing you a calm, bug-free holiday. 🌟
 
 image:../static/image/aoc_2025_decor.png[AoC,700, 400]
+
+include::common/footer.adoc[]

@@ -108,3 +108,6 @@ enabling the retrieval of results for search terms that may contain typos
 
 ====== Next Steps
 Explore  link:/vespa/rules[Search Rules] to enhance search results further.
+
+
+include::common/footer.adoc[]

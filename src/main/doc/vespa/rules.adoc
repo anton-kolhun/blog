@@ -63,3 +63,5 @@ By following these steps, we have successfully implemented and activated the rul
 
 ====== Next Steps
 Explore  link:/vespa/semantic_search[Semantic Search] to improve search quality further
+
+include::common/footer.adoc[]

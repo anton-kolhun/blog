@@ -176,3 +176,5 @@ By following these steps, we have successfully configured a text-to-image search
 
 ====== Next Steps
 Explore link:https://www.wix.engineering/post/the-art-of-secure-search-how-wix-mastered-pii-data-in-vespa-search-engine[Implementing PII Search]
+
+include::common/footer.adoc[]

@@ -15,3 +15,5 @@ link:https://vespa.ai/[More]
 - link:/vespa/semantic_search[Configure Semantic Search]
 - link:/vespa/text_to_image_search[Configure Text To Image Search]
 - link:https://www.wix.engineering/post/the-art-of-secure-search-how-wix-mastered-pii-data-in-vespa-search-engine[Implementing PII Search]
+
+include::common/footer.adoc[]

@@ -109,3 +109,5 @@ image:../static/image/power_supply_scaled.png[power_supply_scaled, float="center
 This guide explains how to set up a power supply status notification system using Healthchecks.io and an Android app.
 The system monitors power supply events and sends alerts through messaging apps.
 By combining device heartbeat monitoring and power event detection, the solution ensures reliability, scalability, and resilience.
+
+include::common/footer.adoc[]

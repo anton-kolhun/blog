@@ -20,3 +20,6 @@ Have questions about a recent post? Or just want to say hello? Feel free to reac
 |GitHub
 |https://github.com/anton-kolhun
 |===
+
+
+include::common/footer.adoc[]

@@ -100,3 +100,5 @@ By following these steps, we have configured a semantic search that significantl
 
 ====== Next Steps
 Explore  link:/vespa/text_to_image_search[Text-To-Image Search] to improve search quality further
+
+include::common/footer.adoc[]

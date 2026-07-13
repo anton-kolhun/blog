@@ -75,3 +75,6 @@ The source for the Wix Headless app is at link:https://github.com/anton-kolhun/w
 
 For comparison, the original version of this blog without any of these features is still running at link:https://blog-no-wix-headless.ltpu.net/home[blog-no-wix-headless.ltpu.net].
 
+
+
+include::common/footer.adoc[]

@@ -115,3 +115,6 @@ Through these steps, we successfully customized our rank profile to suit our nee
 
 ====== Next Steps
 Explore  link:/vespa/ngram[N-Gram Search] to enhance search results further.
+
+
+include::common/footer.adoc[]

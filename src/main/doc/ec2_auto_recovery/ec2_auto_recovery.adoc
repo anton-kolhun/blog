@@ -132,3 +132,5 @@ With minimal effort and no additional cost, we’ve:
 
 This approach is suitable for non-critical applications or personal projects where brief downtime is acceptable.
 Similar strategies can be applied in other cloud environments with minor tweaks.
+
+include::common/footer.adoc[]

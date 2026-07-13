@@ -8,3 +8,6 @@ include::common/header.adoc[]
 - link:/ssl_certs/ssl_certs[Enrolling and Provisioning an SSL Certificate With Let’s Encrypt]
 - link:/aoc/aoc_home[Advent of Code]
 - link:/wix_headless/wix_headless[Extending a Static Blog With Wix Headless: Comments, Reactions, and Newsletter]
+
+
+include::common/footer.adoc[]

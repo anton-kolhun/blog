@@ -135,3 +135,6 @@ In this guide, we’ve:
 Your application is now securely accessible over *HTTPS*.
 
 
+
+
+include::common/footer.adoc[]
