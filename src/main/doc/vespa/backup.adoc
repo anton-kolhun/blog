@@ -39,7 +39,7 @@ The backup pod must be registered as a legitimate cluster member in the Vespa Ap
 
 ==== Custom Docker Image
 
-The backup pod is built on top of the official `vespaengine/vespa` image. We use a https://github.com/anton-kolhun/vespa-sample/blob/main/vespa-backup/backup-image/Dockerfile[multi-stage build]: the first stage compiles the Java web server with Maven, and the second stage layers it onto the Vespa base image alongside the AWS CLI. The entrypoint first starts Vespa's own services - the backup pod is not a content node, but it relies on Vespa's CLI tooling (`vespa-visit`, `vespa-feeder`) which requires local Vespa services to be running - then launches the web server.
+The backup pod is built on top of the official `vespaengine/vespa` image using a https://github.com/anton-kolhun/vespa-sample/blob/main/vespa-backup/backup-image/Dockerfile[multi-stage build]: Maven compiles the Java web server in the first stage, and the second stage layers it onto the Vespa base image alongside the AWS CLI. The entrypoint starts Vespa's own services before launching the web server — `vespa-visit` and `vespa-feeder` require local Vespa services to be available.
 
 === How the Backup Works
 
