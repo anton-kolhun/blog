@@ -19,7 +19,7 @@ _The code samples in this post are intentionally simplified to illustrate the ap
 
 === The Backup Pod
 
-We run a dedicated `vespa-backup` `StatefulSet` (one replica) inside the same Kubernetes cluster as Vespa. It shares the same network, which means it can reach Vespa's internal `configserver` and content cluster directly.
+We run a dedicated `vespa-backup` `StatefulSet` (single pod) inside the same Kubernetes cluster as Vespa - see the https://github.com/anton-kolhun/vespa-sample/tree/main/vespa-backup/vespa-helm[Helm chart] for the full Kubernetes resources. It shares the same network, which means it can reach Vespa's internal `configserver` and content cluster directly.
 
 The pod runs a plain Java HTTP server that exposes a single `POST /backup` endpoint. It accepts two optional query parameters: `chunks` (number of document space slices) and `threads` (size of the visiting thread pool).
 
@@ -39,7 +39,7 @@ The backup pod must be registered as a legitimate cluster member in the Vespa Ap
 
 ==== Custom Docker Image
 
-The backup pod is built on top of the official `vespaengine/vespa` image using a https://github.com/anton-kolhun/vespa-sample/blob/main/vespa-backup/backup-image/Dockerfile[multi-stage build]: Maven compiles the Java web server in the first stage, and the second stage layers it onto the Vespa base image alongside the AWS CLI. The entrypoint starts Vespa's own services before launching the web server — `vespa-visit` and `vespa-feeder` require local Vespa services to be available.
+The backup pod is built on top of the official `vespaengine/vespa` image using a https://github.com/anton-kolhun/vespa-sample/blob/main/vespa-backup/backup-image/Dockerfile[multi-stage build]: Maven compiles the Java web server in the first stage, and the second stage layers it onto the Vespa base image alongside the AWS CLI. The entrypoint starts Vespa's own services before launching the web server - `vespa-visit` and `vespa-feeder` require local Vespa services to be available.
 
 === How the Backup Works
 
