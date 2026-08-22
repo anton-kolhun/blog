@@ -1,0 +1,78 @@
+include::common/header.adoc[]
+
+== Backing Up Vespa
+image:../static/image/calendar.png[cal,20] [.greyed]#24 Aug 2026# 🇺🇦
+
+=== Why Backup Matters for Vespa
+
+Vespa stores its data on the local file system of its content nodes - there is no external storage to restore from. If a cluster gets corrupted, misconfigured, or simply needs to be seeded in a new environment, you need a way to extract all documents and feed them back. Vespa doesn't ship a built-in backup tool, so we built one.
+
+This post describes the backup system we run in production for our Vespa search clusters.
+
+=== Overview
+
+We run Vespa inside a Kubernetes cluster, and the backup solution described here is built around that setup. That said, the core approach - a dedicated process that periodically exports and ships documents to object storage - is not Kubernetes-specific and can be adapted to any environment where Vespa is deployed.
+
+Having a reliable backup serves two main purposes: restoring a cluster after data loss or corruption, and seeding a fresh cluster when migrating to a new Vespa version.
+
+_The code samples in this post are intentionally simplified to illustrate the approach. A production implementation would add fault tolerance (handling backup pod restarts, etc.), retry logic, and observability._
+
+=== The Backup Pod
+
+We run a dedicated `vespa-backup` `StatefulSet` (one replica) inside the same Kubernetes cluster as Vespa. It shares the same network, which means it can reach Vespa's internal `configserver` and content cluster directly.
+
+The pod runs a plain Java HTTP server that exposes a single `POST /backup` endpoint. It accepts two optional query parameters: `chunks` (number of document space slices) and `threads` (size of the visiting thread pool).
+
+==== Registration in services.xml
+
+The backup pod must be registered as a legitimate cluster member in the Vespa Application Package's https://github.com/anton-kolhun/vespa-sample/blob/main/vespa-backup/vap/services.xml[services.xml]. Without this entry, the cluster will not recognise the pod and it will be unable to communicate with the content nodes.
+
+[source,xml]
+----
+<container id="backup" version="1.0">
+    <document-processing/>
+    <nodes>
+        <node hostalias="vespa-backup"/>
+    </nodes>
+</container>
+----
+
+==== Custom Docker Image
+
+The backup pod is built on top of the official `vespaengine/vespa` image. We use a https://github.com/anton-kolhun/vespa-sample/blob/main/vespa-backup/backup-image/Dockerfile[multi-stage build]: the first stage compiles the Java web server with Maven, and the second stage layers it onto the Vespa base image alongside the AWS CLI. The entrypoint first starts Vespa's own services - the backup pod is not a content node, but it relies on Vespa's CLI tooling (`vespa-visit`, `vespa-feeder`) which requires local Vespa services to be running - then launches the web server.
+
+=== How the Backup Works
+
+The implementation is intentionally simple: the Java code orchestrates shell CLI commands - `vespa-visit`, `gzip`, and `aws s3 cp` - rather than reimplementing their logic. Each backup run goes through three steps:
+
+. *Document Export* - the document space is split into N slices, each visited by a separate process via `vespa-visit`. Slices run in a dedicated worker pool with a configurable thread limit, which bounds the number of concurrent visits and prevents heavy visiting from degrading cluster performance.
+. *Compression* - once a slice finishes, the resulting JSON dump is compressed with `gzip`.
+. *S3 upload* - the compressed file is uploaded via `aws s3 cp` to a date-partitioned path and deleted after a successful upload.
+
+Steps 2 and 3 happen in a dedicated worker pool, decoupled from the visiting pool. This means compression and upload of finished slices run concurrently with `vespa-visit` still processing others - keeping disk usage bounded and speeding up the overall backup without overloading the system.
+
+The full implementation is available at https://github.com/anton-kolhun/vespa-sample/blob/main/vespa-backup/backup-image/src/main/java/com/example/BackupServer.java[BackupServer.java].
+
+=== Automating Backup Runs
+
+Backup runs can be automated using a Kubernetes `CronJob`, which is responsible for the full lifecycle of each run:
+
+. *Scale up* - it uses the Kubernetes API to scale `vespa-backup` to one replica and waits for the pod to become ready.
+. *Trigger* - it calls `POST /backup` on the pod to start the backup.
+. *Watch* - it tails the `vespa-backup` pod logs and monitors them for a `Backup completed` log line (success) or a `SEVERE` entry (failure).
+. *Scale down* - once the backup is confirmed finished, it scales the `StatefulSet` back to zero.
+
+Between runs the backup consumes no resources - the `StatefulSet` is scaled to zero.
+
+=== Restore
+
+The backup image ships with https://github.com/anton-kolhun/vespa-sample/blob/main/vespa-backup/backup-image/restore_backup.sh[restore_backup.sh] alongside the backup handler. The script takes a backup date as an argument, downloads the compressed slice files from S3, decompresses them, and feeds the documents back into Vespa using the `vespa-feeder` CLI.
+
+In our setup, writes to Vespa go through Kafka. When restoring a live cluster, the procedure is to first run the restore script, then reset the consumer group offset to any point before the dump was taken - from there the consumer replays and catches up. This works safely as long as all feed operations are idempotent. The same approach applies to any log-based message queue that supports ordering guarantees, such as Amazon Kinesis.
+
+=== Summary
+
+We've built a simple, automated backup solution for Vespa that requires no external tooling beyond S3. By wrapping existing CLI tools in a lightweight HTTP server and letting a CronJob manage the full lifecycle, the backup pod is scaled to zero between runs and triggered on demand when needed. The same image includes a restore script, making the full backup-restore cycle self-contained.
+
+
+include::common/footer.adoc[]
