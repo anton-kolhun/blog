@@ -13,21 +13,20 @@ public class BlogHttpHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        if ("GET".equals(exchange.getRequestMethod())) {
-            var uri = exchange.getRequestURI();
-            if (uri.getPath().startsWith("/static/")) {
-                handleResponse(exchange, uri.getPath().substring(1));
-            }
-            if (uri.getPath().startsWith("/pagefind/")) {
-                handleResponse(exchange, uri.getPath().substring(1));
-            }
-            if (uri.getPath().equals("/")) {
-                handleResponse(exchange, "home.html");
-            }
-            String htmlPage = uri.getPath().substring(uri.getPath().lastIndexOf("/") + 1) + ".html";
-            handleResponse(exchange, htmlPage);
+        if (!"GET".equals(exchange.getRequestMethod())) {
+            exchange.getResponseHeaders().set("Allow", "GET");
+            exchange.sendResponseHeaders(405, -1);
+            exchange.close();
+            return;
         }
-        throw new RuntimeException("HTTP method not supported");
+        String path = exchange.getRequestURI().getPath();
+        if (path.startsWith("/static/") || path.startsWith("/pagefind/")) {
+            handleResponse(exchange, path.substring(1));
+        } else if (path.equals("/")) {
+            handleResponse(exchange, "home.html");
+        } else {
+            handleResponse(exchange, path.substring(path.lastIndexOf("/") + 1) + ".html");
+        }
     }
 
     private static String contentType(String path) {
