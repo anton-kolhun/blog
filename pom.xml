@@ -61,7 +61,7 @@
                         <executions>
                             <execution>
                                 <id>pagefind-index</id>
-                                <phase>package</phase>
+                                <phase>prepare-package</phase>
                                 <goals>
                                     <goal>exec</goal>
                                 </goals>
