@@ -181,10 +181,10 @@
 <script type="module">
   const REACTIONS_API = window.location.hostname === "localhost"
     ? "http://localhost:4321/api/reactions"
-    : "https://anton-blog-0ac9306d-antonkol.wix-site-host.com/api/reactions";
+    : "https://anton-blog-antonkolhun-0a0b.wix-site-host.com/api/reactions";
   const COMMENTS_API = window.location.hostname === "localhost"
     ? "http://localhost:4321/api/comments"
-    : "https://anton-blog-0ac9306d-antonkol.wix-site-host.com/api/comments";
+    : "https://anton-blog-antonkolhun-0a0b.wix-site-host.com/api/comments";
 
   const NON_ARTICLE = ["/home", "/about"];
   const path = window.location.pathname;
@@ -325,7 +325,7 @@
 <script type="module">
   const SUBSCRIBE_API = window.location.hostname === "localhost"
     ? "http://localhost:4321/api/subscribe"
-    : "https://anton-blog-0ac9306d-antonkol.wix-site-host.com/api/subscribe";
+    : "https://anton-blog-antonkolhun-0a0b.wix-site-host.com/api/subscribe";
 
   document.addEventListener("DOMContentLoaded", () => {
     const btn = document.getElementById("sub-btn");
